@@ -852,8 +852,11 @@ class Appointment(sync.SyncableEntity):
                     clinic_id = appointment.get('clinic_id')
                     user_id = appointment.get('user_id')
 
+                    print(f"Processing appointment: {appointment}")
+
+
                     # Set provider_id to None if it's not present, empty, or an invalid UUID
-                    if not provider_id or not is_valid_uuid(provider_id, 1):
+                    if not provider_id or (not is_valid_uuid(provider_id, 1) and not is_valid_uuid(provider_id, 4)):
                         print(f"Invalid provider_id for appointment: {
                             appointment['id']}")
                         appointment['provider_id'] = None
