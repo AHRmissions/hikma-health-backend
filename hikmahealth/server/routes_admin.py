@@ -1107,42 +1107,41 @@ def get_all_clinics(_):
     return jsonify({"clinics": clinics})
 
 
-@api.delete("/clinics/<id>")
+
+@api.delete('/clinics/<id>')
 @middleware.authenticated_admin
 def delete_clinic(_, id: str):
-    try:
-        params = webhelper.assert_data_has_keys(request, {"id"})
-        with db.get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
+	try:
+		with db.get_connection() as conn:
+			with conn.cursor() as cur:
+				cur.execute(
+					"""
                     UPDATE clinics
                     SET is_deleted = TRUE, deleted_at = current_timestamp, last_modified = current_timestamp
                     WHERE id = %s AND is_deleted = FALSE
                     RETURNING id
                     """,
-                    [params["id"]],
-                )
-                deleted_clinic = cur.fetchone()
+					[id],
+				)
+				deleted_clinic = cur.fetchone()
 
-                if not deleted_clinic:
-                    return (
-                        jsonify(
-                            {"error": "Clinic not found or already deleted"}),
-                        404,
-                    )
+				if not deleted_clinic:
+					return (
+						jsonify({'error': 'Clinic not found or already deleted'}),
+						404,
+					)
 
-        return jsonify({"ok": True, "message": "Clinic deleted successfully"})
+		return jsonify({'ok': True, 'message': 'Clinic deleted successfully'})
 
-    except WebError as we:
-        logging.error(f"WebError: {we}")
-        return jsonify({"error": str(we)}), we.status_code
-    except PostgresError as pe:
-        logging.error(f"PostgresError: {pe}")
-        return jsonify({"error": "Database error occurred"}), 500
-    except Exception as e:
-        logging.error(f"Exception: {e}")
-        return jsonify({"error": "An unexpected error occurred"}), 500
+	except WebError as we:
+		logging.error(f'WebError: {we}')
+		return jsonify({'error': str(we)}), we.status_code
+	except PostgresError as pe:
+		logging.error(f'PostgresError: {pe}')
+		return jsonify({'error': 'Database error occurred'}), 500
+	except Exception as e:
+		logging.error(f'Exception: {e}')
+		return jsonify({'error': 'An unexpected error occurred'}), 500
 
 
 @api.get("/appointments/search")
